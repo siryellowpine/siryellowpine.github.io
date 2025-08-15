@@ -13,10 +13,11 @@ CATEGORIES = [
 ]
 
 def slugify(s: str) -> str:
+    # Menünüzdeki sluglarla birebir uyum (tiresiz): shippingandmaritime, essaysandarticles, personalopinions
     s = s.strip().lower().replace("&","and").replace(","," ")
     s = re.sub(r"[^a-z0-9\s-]", "", s)
     s = re.sub(r"\s+", " ", s)
-    return s.replace(" ", "-")
+    return s.replace(" ", "")  # <--- ÖNEMLİ: tire yerine tamamen birleşik
 
 def escape(s: str) -> str:
     return html.escape(s, quote=True)
@@ -94,7 +95,7 @@ def build_post_html(site_title, menu_html, title, category, subcategory, date, c
 """
 
 def build_index_scaffold(menu_html: str, site_title: str) -> str:
-    # JavaScript bu HTML STRING'inin içinde. Python dosyasının dışında JS satırı yok.
+    # Çoklu kategori filtresi (virgülle ayrılmış data-cat/data-sub destekli)
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -104,6 +105,7 @@ def build_index_scaffold(menu_html: str, site_title: str) -> str:
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css">
   <meta name="theme-color" content="#3f342a" />
+  <meta name="description" content="Compact, aristocratic blog by Yakup Sarıçam.">
 </head>
 <body>
   <header>
@@ -155,16 +157,12 @@ def build_index_scaffold(menu_html: str, site_title: str) -> str:
 
 def build_index_card_multi(title, cats, date, slug, content) -> str:
     """
-    cats: [("Category","Subcategory"), ...]
-    Subcategory boş olabilir: ""
+    cats: [("Category","Subcategory"), ...]  (Subcategory "" olabilir)
     """
     preview = re.sub(r"\s+", " ", content.strip())[:EXCERPT_LEN] + "…"
-
-    # slug listeleri (virgülle ayrılmış)
     cat_slugs = ",".join(slugify(c) for c, _ in cats if c.strip())
     sub_slugs = ",".join(slugify(s) for _, s in cats if s and s.strip())
 
-    # Etiket HTML'leri
     tags = []
     for c, s in cats:
         if c.strip():
@@ -187,26 +185,13 @@ def build_index_card_multi(title, cats, date, slug, content) -> str:
         </article>
 """.rstrip()
 
-def build_index_card(title, category, subcategory, date, slug, content) -> str:
-    # Yedek: tek kategori kartı (kullanmasak da kalsın)
-    preview = re.sub(r"\s+", " ", content.strip())[:EXCERPT_LEN] + "…"
-    cat_html = f"<a class=\"tag\" href=\"index.html#cat={slugify(category)}\">{escape(category)}</a>"
-    sub_html = ""
-    if subcategory.strip():
-        sub_html = f"\n            <a class=\"tag\" href=\"index.html#cat={slugify(category)}&sub={slugify(subcategory)}\">{escape(subcategory)}</a>"
-    return f"""
-        <article class="card" data-cat="{slugify(category)}" data-sub="{slugify(subcategory)}">
-          <div class="date-badge">{escape(date)}</div>
-          <div class="meta">
-            {cat_html}{sub_html}
-          </div>
-          <h2 class="title">{escape(title)}</h2>
-          <p class="excerpt">{escape(preview)}</p>
-          <div class="actions">
-            <a class="btn" href="posts/{escape(slug)}.html">Read more</a>
-          </div>
-        </article>
-""".rstrip()
+def purge_existing_cards(index_html: str, slug: str) -> str:
+    """Aynı sluga giden eski kartları index'ten temizle (Martin Eden'e dokunmaz)."""
+    pattern = re.compile(
+        r'<article class="card"[\s\S]*?href="posts/' + re.escape(slug) + r'\.html"[\s\S]*?</article>\s*',
+        re.IGNORECASE
+    )
+    return re.sub(pattern, "", index_html)
 
 def main_cli():
     ap = argparse.ArgumentParser()
@@ -218,16 +203,11 @@ def main_cli():
     g.add_argument("--content_file")
     g.add_argument("--content_text")
     ap.add_argument("--outdir", default=".")
-    # Çoklu kategori desteği: --also "Category|Subcategory"
-    ap.add_argument(
-        "--also",
-        action="append",
-        default=[],
-        help="Ek kategori çiftleri: 'Category|Subcategory'. Alt kategori yoksa 'Category|' şeklinde kullan."
-    )
+    ap.add_argument("--also", action="append", default=[],
+                    help="Ek kategori çiftleri: 'Category|Subcategory'. Alt kategori yoksa 'Category|' kullanın.")
     args = ap.parse_args()
 
-    # İçerik al
+    # İçeriği al
     if args.content_file and os.path.exists(args.content_file):
         with open(args.content_file, "r", encoding="utf-8") as f:
             content = f.read().strip()
@@ -244,7 +224,7 @@ def main_cli():
     post_filename = os.path.join(args.outdir, "posts", f"{slug}.html")
     index_filename = os.path.join(args.outdir, "index.html")
 
-    # index scaffold (yoksa yaz)
+    # index scaffold (yoksa yaz) ve eski kartları temizle
     if os.path.exists(index_filename):
         with open(index_filename, "r", encoding="utf-8") as f:
             current_index = f.read()
@@ -252,6 +232,9 @@ def main_cli():
         current_index = ""
     if "<section id=\"list\"" not in current_index:
         current_index = build_index_scaffold(menu_html, SITE_TITLE)
+
+    # Aynı sluga giden tüm eski kartları temizle
+    current_index = purge_existing_cards(current_index, slug)
 
     # Çoklu kategori tek kart
     pairs = [(args.category, args.subcategory or "")]
@@ -263,7 +246,14 @@ def main_cli():
             pairs.append((extra_cat, extra_sub))
 
     card_html = build_index_card_multi(args.title, pairs, args.date, slug, content)
-    updated_index = current_index.replace("</section>", card_html + "\n      </section>", 1)
+
+    # YENİ POSTU HER ZAMAN EN ÜSTE EKLE
+    marker = '<section id="list">'
+    pos = current_index.find(marker)
+    if pos != -1:
+        updated_index = current_index[:pos+len(marker)] + "\n        " + card_html + current_index[pos+len(marker):]
+    else:
+        updated_index = current_index.replace("</section>", card_html + "\n      </section>", 1)
 
     with open(index_filename, "w", encoding="utf-8") as f:
         f.write(updated_index)
