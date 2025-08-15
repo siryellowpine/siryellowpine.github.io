@@ -3,13 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Yakup Sarıçam</title>
+  <title>About — Yakup Sarıçam</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css">
   <meta name="theme-color" content="#3f342a" />
-  <meta name="description" content="Compact, aristocratic single-file blog by Yakup Sarıçam.">
-  <meta property="og:title" content="Yakup Sarıçam" />
-  <meta property="og:type" content="website" />
 </head>
 <body>
   <header>
@@ -24,42 +21,24 @@
       <nav class="menu"><div class='cat'><span><a href='index.html#cat=shipping-and-maritime'>Shipping &amp; Maritime</a></span><div class='sub'><a href='index.html#cat=shipping-and-maritime&sub=freight-market-analysis'>Freight Market Analysis</a><a href='index.html#cat=shipping-and-maritime&sub=maritime-news-and-trends'>Maritime News &amp; Trends</a></div></div><div class='cat'><span><a href='index.html#cat=books-literature-and-art'>Books, Literature &amp; Art</a></span><div class='sub'><a href='index.html#cat=books-literature-and-art&sub=recommendations'>Recommendations</a><a href='index.html#cat=books-literature-and-art&sub=forewords'>Forewords</a><a href='index.html#cat=books-literature-and-art&sub=reviews-and-critiques'>Reviews &amp; Critiques</a></div></div><div class='cat'><span><a href='index.html#cat=essays-and-articles'>Essays &amp; Articles</a></span><div class='sub'><a href='index.html#cat=essays-and-articles&sub=personal-opinions'>Personal Opinions</a></div></div><div class='cat'><span><a href='index.html#cat=global-trends'>Global Trends</a></span></div></nav>
     </div>
   </header>
+
   <main>
     <div class="wrap">
-      <section id="list">
-        <article class="card" data-cat="books-literature-and-art" data-sub="forewords">
-          <div class="meta">
-            <a class="tag" href="index.html#cat=books-literature-and-art">Books, Literature &amp; Art</a>
-            <a class="tag" href="index.html#cat=books-literature-and-art&sub=forewords">Forewords</a>
-            <span>2025-08-15</span>
-          </div>
-          <h2 class="title">FOREWORD / MARTIN EDEN</h2>
-          <p class="excerpt">In this novel Jack London invites us into America’…</p>
-          <div class="actions"><a class="btn" href="posts/foreword-martin-eden.html">Read more</a></div>
-        </article>
-      </section>
+      <article class="card">
+        <h2 class="title">About</h2>
+        <div class="post-body">
+          <p>Hello — this is a compact, aristocratic blog by Yakup Sarıçam. The site is a static HTML build with a sepia-gold aesthetic and Courier typography.</p>
+          <p>Categories include Shipping & Maritime, Books, Literature & Art, Essays & Articles, and Global Trends.</p>
+          <p>Contact: add your preferred email or social links here.</p>
+        </div>
+        <div class="actions"><a class="btn" href="index.html">← Back to home</a></div>
+      </article>
     </div>
   </main>
+
   <footer>
     <div class="wrap">© <span id="year"></span> Yakup Sarıçam</div>
   </footer>
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-    function parseHash(){
-      const h = location.hash.startsWith("#") ? location.hash.slice(1) : "";
-      const p = new URLSearchParams(h);
-      return {cat: p.get("cat"), sub: p.get("sub")};
-    }
-    function applyFilter(){
-      const q = parseHash();
-      document.querySelectorAll("#list article").forEach(a=>{
-        const okCat = !q.cat || a.dataset.cat === q.cat;
-        const okSub = !q.sub || a.dataset.sub === q.sub;
-        a.style.display = (okCat && okSub) ? "" : "none";
-      });
-    }
-    window.addEventListener("hashchange", applyFilter);
-    applyFilter();
-  </script>
+  <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
 </body>
 </html>
