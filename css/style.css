@@ -14,7 +14,7 @@
 html,body{height:100%}
 body{
   margin:0;
-  background: linear-gradient(180deg, #453a30 0%, #3f342a 60%, #3b3128 100%);
+  background: radial-gradient(1200px 600px at 50% -10%, #4a3e33, #3f342a 55%, #3b3128 100%);
   color: var(--ink);
   font-family: var(--font);
   letter-spacing: .2px;
@@ -40,7 +40,7 @@ header{
 }
 .topnav a:hover{ border-bottom-color: rgba(197,167,106,.6); }
 .brand{display:flex; align-items:center; gap:10px; padding:2px 0 10px;}
-.logo{ width:34px; height:34px; display:inline-block; } /* +~20% */
+.logo{ width:34px; height:34px; display:inline-block; }
 .brand h1{ margin:0; font-size: 20px; font-weight: 700; text-transform: uppercase; color: #e7dcc8; letter-spacing: 2px; }
 .menu{ display:flex; gap:16px; align-items:center; padding:8px 0 12px; font-size: 12px; border-top:1px dashed rgba(197,167,106,.35);}
 .cat{ position:relative; color:#e9dfc9; }
@@ -51,12 +51,19 @@ header{
 .sub a{ display:block; padding:4px 6px; color:#e9dfc9; }
 main{ padding: 18px 0 24px; }
 .card{
+  position: relative;
   background: var(--paper);
   border: 1px solid var(--edge);
   border-top: 3px double var(--gold);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 14px 14px 16px;
+}
+.date-badge{
+  position:absolute;
+  top:10px; right:12px;
+  font-size: 12px;
+  color: var(--muted);
 }
 .meta{ display:flex; gap:10px; align-items:center; color: var(--muted); font-size: 14px; flex-wrap: wrap;}
 .meta .tag{
@@ -68,7 +75,7 @@ main{ padding: 18px 0 24px; }
 }
 .meta .tag:hover{ border-color: var(--gold); color: var(--ink); background: #efe6d0;}
 h2.title{ margin: 8px 0 6px; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
-.excerpt{ color: var(--muted); font-size: 16px; line-height: 1.6; } /* uniform size */
+.excerpt{ color: var(--muted); font-size: 16px; line-height: 1.6; }
 .actions{ margin-top: 8px; }
 .btn{
   display:inline-block;
@@ -78,6 +85,8 @@ h2.title{ margin: 8px 0 6px; font-size: 18px; text-transform: uppercase; letter-
   background: transparent;
 }
 .btn:hover{ border-color: var(--gold); background: #efe6d0;}
-.post-body p{ margin: 10px 0 10px; line-height: 1.6; font-size: 16px; } /* uniform size */
+.post-body p{ margin: 10px 0 10px; line-height: 1.6; font-size: 16px; }
 footer{ color:#d8caaa; border-top:1px dashed rgba(197,167,106,.35); padding: 14px 0 22px; margin-top: 18px; font-size: 12px; }
 .hidden{ display:none; }
+.post-header{ position: relative; }
+.post-header .date-badge{ top: 0; right: 0; }
