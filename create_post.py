@@ -13,8 +13,8 @@ return f"""<!doctype html>
     <div class="wrap">
       <div class="topnav">
         <div>
-          <a href="../index.html">Home</a>
-          <a href="../about.html">About</a>
+          <a href="/">Home</a>
+          <a href="/about.html">About</a>
         </div>
       </div>
       <div class="brand">
@@ -38,7 +38,7 @@ return f"""<!doctype html>
         <div class="post-body">
           {paragraphs_html(content)}
         </div>
-        <div class="actions"><a class="btn" href="../index.html">← Back to home</a></div>
+        <div class="actions"><a class="btn" href="/">← Back to home</a></div>
       </article>
     </div>
   </main>
