@@ -1,46 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-import argparse, os, sys, re, html
-
-SITE_TITLE = "Yakup Sarıçam"
-EXCERPT_LEN = 90
-
-CATEGORIES = [
-    {"name": "Shipping & Maritime", "children": ["Freight Market Analysis", "Maritime News & Trends"]},
-    {"name": "Books, Literature & Art", "children": ["Recommendations", "Forewords", "Reviews & Critiques"]},
-    {"name": "Essays & Articles", "children": ["Personal Opinions"]},
-    {"name": "Global Trends", "children": []},
-]
-
-def slugify(s: str) -> str:
-    # Menünüzdeki sluglarla birebir uyum (tiresiz): shippingandmaritime, essaysandarticles, personalopinions
-    s = s.strip().lower().replace("&","and").replace(","," ")
-    s = re.sub(r"[^a-z0-9\s-]", "", s)
-    s = re.sub(r"\s+", " ", s)
-    return s.replace(" ", "")  # <--- ÖNEMLİ: tire yerine tamamen birleşik
-
-def escape(s: str) -> str:
-    return html.escape(s, quote=True)
-
-def build_menu_html() -> str:
-    def s(x): return slugify(x)
-    parts = []
-    for c in CATEGORIES:
-        subs = ""
-        if c["children"]:
-            subs = "<div class='sub'>" + "".join(
-                f"<a href='index.html#cat={s(c['name'])}&sub={s(ch)}'>{escape(ch)}</a>"
-                for ch in c["children"]
-            ) + "</div>"
-        parts.append(f"<div class='cat'><span><a href='index.html#cat={s(c['name'])}'>{escape(c['name'])}</a></span>{subs}</div>")
-    return "".join(parts)
-
-def paragraphs_html(text: str) -> str:
-    paras = [p.strip() for p in re.split(r"\n\s*\n", text.strip()) if p.strip()]
-    return "".join(f"<p>{escape(p)}</p>" for p in paras)
-
-def build_post_html(site_title, menu_html, title, category, subcategory, date, content) -> str:
-    return f"""<!doctype html>
+return f"""<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -72,9 +30,8 @@ def build_post_html(site_title, menu_html, title, category, subcategory, date, c
       <article class="card">
         <div class="post-header">
           <div class="date-badge">{escape(date)}</div>
-          <div class="meta">
-            <a class="tag" href="../index.html#cat={slugify(category)}">{escape(category)}</a>
-            {f'<a class="tag" href="../index.html#cat={slugify(category)}&sub={slugify(subcategory)}">{escape(subcategory)}</a>' if subcategory.strip() else ''}
+                              <div class="meta">
+            {tags_html}
           </div>
           <h2 class="title">{escape(title)}</h2>
         </div>
@@ -259,7 +216,7 @@ def main_cli():
         f.write(updated_index)
 
     # Post sayfası (tek kez)
-    post_html = build_post_html(SITE_TITLE, menu_html, args.title, args.category, args.subcategory, args.date, content)
+    post_html = build_post_html(SITE_TITLE, menu_html, args.title, pairs, args.date, content)
     with open(post_filename, "w", encoding="utf-8") as f:
         f.write(post_html)
 
